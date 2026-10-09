@@ -84,7 +84,7 @@ chmod +x ~/.claude/scripts/zhipu-statusline.sh
 
 北京韶聪泽明智能科技有限责任公司
 
-企业数字员工 · 企业 AI 落地服务 · FDE
+班底 ZECREW 桌面 AI 办公伙伴 · 员工与技能定制 · 企业 AI 服务（FDE）
 
 WaytoAGI 模数OPC 社区
 
