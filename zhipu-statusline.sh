@@ -2,7 +2,7 @@
 # zhipu-statusline.sh — Claude Code statusline 显示智谱 GLM Coding Plan 额度
 #
 # 原理：把智谱的 5 小时 / 周额度按 Claude Code 官方 statusline stdin schema
-# 注入 rate_limits 字段，交由 xiangrui-hud / claude-hud 原版渲染——
+# 注入 rate_limits 字段，交由状态栏 HUD 原版渲染——
 # 字体、颜色、进度条长度、重置倒计时与 Claude 订阅时代完全一致。
 #
 # 数据源: GET https://open.bigmodel.cn/api/monitor/usage/quota/limit (Bearer 裸 API Key)
@@ -97,8 +97,8 @@ hud_dir=$(find_hud xiangrui-hud)
 if [[ -n "$hud_dir" && -f "${hud_dir}dist/index.js" ]]; then
     printf '%s' "$final_input" | exec "$NODE_BIN" "${hud_dir}dist/index.js"
 else
-    # HUD 不存在：兜底裸输出，保证状态栏不空白
+    # 状态栏渲染插件不在默认位置：兜底裸输出，保证状态栏不空白
     printf '%s' "$final_input" | jq -r '
         "□ \(.model.display_name // .model.id // "?") │ \(.workspace.current_dir // .cwd // "?" | split("/") | last)
-        上下文 ?%（未检测到 xiangrui-hud / claude-hud 插件）"'
+        上下文 ?%（未检测到状态栏渲染插件）"'
 fi
