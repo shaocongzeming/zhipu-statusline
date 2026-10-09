@@ -10,7 +10,7 @@
 #   TOKENS_LIMIT unit=6 → 周窗口
 # 该接口官方未公开文档，智谱后续可能调整；失效时状态栏自动降级为不显示额度。
 #
-# 依赖: bash, jq, curl, node（xiangrui-hud 需要）
+# 依赖: bash, jq, curl, node（状态栏渲染插件需要）
 # 环境变量:
 #   ZHIPU_STATUSLINE_TTL   缓存秒数，默认 120
 #   ZHIPU_STATUSLINE_NODE  node 可执行文件路径，默认自动查找
