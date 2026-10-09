@@ -97,8 +97,43 @@ hud_dir=$(find_hud xiangrui-hud)
 if [[ -n "$hud_dir" && -f "${hud_dir}dist/index.js" ]]; then
     printf '%s' "$final_input" | exec "$NODE_BIN" "${hud_dir}dist/index.js"
 else
-    # 状态栏渲染插件不在默认位置：兜底裸输出，保证状态栏不空白
-    printf '%s' "$final_input" | jq -r '
-        "□ \(.model.display_name // .model.id // "?") │ \(.workspace.current_dir // .cwd // "?" | split("/") | last)
-        上下文 ?%（未检测到状态栏渲染插件）"'
+    # ── 无状态栏渲染插件：脚本自画简版额度条（绿 <50% / 黄 50-79% / 红 ≥80%）──
+    fb_model=$(printf '%s' "$final_input" | jq -r '.model.display_name // .model.id // "?"')
+    fb_dir=$(printf '%s' "$final_input" | jq -r '(.workspace.current_dir // .cwd // "?") | split("/") | last')
+    fb_row=$(printf '%s' "$final_input" | jq -r '
+        [.rate_limits.five_hour.used_percentage  // -1,
+         .rate_limits.five_hour.resets_at        // -1,
+         .rate_limits.seven_day.used_percentage  // -1,
+         .rate_limits.seven_day.resets_at        // -1] | @tsv' 2>/dev/null)
+    read -r fb_p5 fb_r5 fb_p7 fb_r7 <<< "$fb_row"
+
+    fb_bar() {  # $1=pct → 10 格 █/░，颜色随用量
+        local p=$1 n=0 i out="" color=32
+        (( p > 100 )) && p=100; (( p < 0 )) && p=0
+        n=$(( p * 10 / 100 ))
+        (( p >= 80 )) && color=31; (( p >= 50 && p < 80 )) && color=33
+        for ((i=0; i<n; i++)); do out+="█"; done
+        for ((i=n; i<10; i++)); do out+="░"; done
+        printf '\033[%sm%s\033[0m' "$color" "$out"
+    }
+    fb_countdown() {  # $1=epoch 秒 → "45m" / "2h 5m" / "5d 7h"
+        local s=$((( $1 - $(date +%s) )))
+        (( s < 0 )) && s=0
+        if   (( s < 3600 ));   then printf '%dm' $(( s / 60 ))
+        elif (( s < 172800 )); then printf '%dh %dm' $(( s / 3600 )) $(( s % 3600 / 60 ))
+        else                        printf '%dd %dh' $(( s / 86400 )) $(( s % 86400 / 3600 ))
+        fi
+    }
+    fb_line() {  # $1=标签 $2=百分比 $3=重置时间 → "用量 █░░ 13% (重置剩余 …)"
+        if (( $2 < 0 )); then
+            printf '\033[2m%s\033[0m ——（暂无额度数据）\n' "$1"
+        else
+            printf '\033[2m%s\033[0m %s %s%% \033[2m(重置剩余 %s)\033[0m\n' "$1" "$(fb_bar "$2")" "$2" "$(fb_countdown "$3")"
+        fi
+    }
+
+    printf '\033[36m□ %s\033[0m \033[2m│\033[0m %s\n' "$fb_model" "$fb_dir"
+    printf '\033[2m上下文\033[0m ?%%（安装状态栏渲染插件后显示）\n'
+    fb_line "用量" "${fb_p5:--1}" "${fb_r5:-0}"
+    fb_line "本周" "${fb_p7:--1}" "${fb_r7:-0}"
 fi
