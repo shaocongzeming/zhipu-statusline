@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+.DS_Store
+__pycache__/
+*.log
+项目开发日志.md
