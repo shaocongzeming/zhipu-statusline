@@ -1,0 +1,5 @@
+[
+  { "name": "主号", "color": "cyan",   "key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.yyyyyyyyyyyyyyyy" },
+  { "name": "副号", "color": "magenta", "key": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz.wwwwwwwwwwwwwwww",
+    "team": { "org": "org-你的团队组织ID", "project": "proj_你的团队项目ID" } }
+]
